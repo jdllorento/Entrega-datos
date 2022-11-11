@@ -1,0 +1,32 @@
+import pandas as pd
+import networkx as nx
+import gmplot
+
+dataframe = pd.read_csv('calles_de_medellin_con_acoso.csv',sep = ';')
+dataframeFinal = dataframe.fillna({"harassmentRisk":dataframe["harassmentRisk"].mean()})
+apikey="AIzaSyDPlk-4WULuil4FpOYTfYh38z5uIU2MaYg"
+
+
+def crearGrafo(df_Filtrado,i):     
+        if i==0:
+            rutas = nx. from_pandas_edgelist(df_Filtrado, source= 'origin',target='destination',edge_attr=['harassmentRisk','length'])
+        if i==1:
+            rutas = nx. from_pandas_edgelist(df_Filtrado, source= 'origin',target='destination',edge_attr= 'length')
+        if i==2:
+            rutas = nx. from_pandas_edgelist(df_Filtrado, source= 'origin',target='destination',edge_attr= 'harassmentRisk')
+        return rutas
+
+v = nx.dijkstra_path(crearGrafo(dataframeFinal, 2),'(-75.5778046, 6.2029412)','(-75.5762232, 6.266327)',weight=True)
+
+
+gmap3 = gmplot.GoogleMapPlotter(6.2029412,-75.5778046,14)
+latitude_list = []
+longitude_list = [] 
+        
+for j in range (len(v)):
+    valores=str(v[j])
+    longitude_list.append(float(valores[1:valores.find(",")]))
+    latitude_list.append(float(valores[valores.find(",")+2:len(valores)-1]))
+gmap3.scatter( latitude_list, longitude_list, size=0 , marker=False )   
+gmap3.plot(latitude_list, longitude_list,'#ff00d4',edge_width=7)
+gmap3.draw(r'C:\Users\Daniela\Desktop\Lenguajes\datos shit\hola.html')
